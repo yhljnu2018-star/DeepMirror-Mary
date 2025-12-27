@@ -44,7 +44,7 @@ export default function MoodJournal() {
             <p className="text-sm font-medium">{getCurrentDate()}</p>
           </div>
           <h1 className="text-2xl font-bold mb-2" style={{ color: '#5A5A5A' }}>
-            今天感觉怎么样？
+            爱老己
           </h1>
           <div className="w-16 h-1 mx-auto rounded-full" style={{ backgroundColor: '#D4A59A' }}></div>
         </header>
