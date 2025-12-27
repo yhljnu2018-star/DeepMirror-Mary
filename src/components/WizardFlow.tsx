@@ -1,18 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { MoodEntry, WizardData } from '../types/mood';
+import { WizardData } from '../types/mood';
 import Step1Event from './wizard/Step1Event';
 import Step2Feeling from './wizard/Step2Feeling';
 import Step3Category from './wizard/Step3Category';
 import Step4Mirror from './wizard/Step4Mirror';
-import HistoryTimeline from './HistoryTimeline';
 
 export default function WizardFlow() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [aiAdvice, setAiAdvice] = useState('');
   const [wizardData, setWizardData] = useState<WizardData>({
     event: '',
@@ -20,21 +17,6 @@ export default function WizardFlow() {
     intensity: 5,
     category: null,
   });
-
-  useEffect(() => {
-    fetchEntries();
-  }, []);
-
-  const fetchEntries = async () => {
-    const { data, error } = await supabase
-      .from('mood_entries')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setEntries(data);
-    }
-  };
 
   const handleNext = () => {
     if (step < 3) {
@@ -54,42 +36,22 @@ export default function WizardFlow() {
     setLoading(true);
     setStep(4);
 
-    const { data: insertedEntry, error: insertError } = await supabase
-      .from('mood_entries')
-      .insert([
-        {
-          event: wizardData.event,
-          mood: wizardData.mood,
-          intensity: wizardData.intensity,
-          category: wizardData.category,
-        },
-      ])
-      .select()
-      .maybeSingle();
+    try {
+      const { generateInitialAdvice } = await import('../api/chat');
+      const advice = await generateInitialAdvice({
+        event: wizardData.event,
+        mood: wizardData.mood,
+        intensity: wizardData.intensity,
+        category: wizardData.category,
+      });
 
-    if (!insertError && insertedEntry) {
-      try {
-        const { generateInitialAdvice } = await import('../api/chat');
-        const advice = await generateInitialAdvice({
-          event: wizardData.event,
-          mood: wizardData.mood,
-          intensity: wizardData.intensity,
-          category: wizardData.category,
-        });
-
-        setAiAdvice(advice);
-
-        await supabase
-          .from('mood_entries')
-          .update({ ai_response: advice })
-          .eq('id', insertedEntry.id);
-      } catch (error) {
-        setAiAdvice('很抱歉，暂时无法生成建议，但我在这里陪着你。');
-      }
+      setAiAdvice(advice);
+    } catch (error) {
+      console.error('生成建议失败:', error);
+      setAiAdvice('很抱歉，暂时无法生成建议，但我在这里陪着你。');
+    } finally {
+      setLoading(false);
     }
-
-    await fetchEntries();
-    setLoading(false);
   };
 
   const handleReset = () => {
@@ -225,9 +187,7 @@ export default function WizardFlow() {
           </div>
         )}
 
-        {step > 1 && (
-          <HistoryTimeline entries={entries} />
-        )}
+        {/* 历史记录功能已移除，因为不再使用数据库 */}
       </div>
     </div>
   );

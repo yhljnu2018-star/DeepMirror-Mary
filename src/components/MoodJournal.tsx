@@ -1,56 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Sparkles, Calendar } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { MoodEntry, MoodType, MOOD_OPTIONS } from '../types/mood';
+import { MoodType, MOOD_OPTIONS } from '../types/mood';
 
 export default function MoodJournal() {
   const [content, setContent] = useState('');
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
-  const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    fetchEntries();
-  }, []);
-
-  const fetchEntries = async () => {
-    const { data, error } = await supabase
-      .from('mood_entries')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setEntries(data);
-    }
-  };
 
   const handleSave = async () => {
     if (!content.trim() || !selectedMood) return;
 
     setLoading(true);
-    const { error } = await supabase
-      .from('mood_entries')
-      .insert([{ content, mood: selectedMood }]);
-
-    if (!error) {
+    // 数据库功能已移除，这里只做本地处理
+    // 如果需要保存数据，可以改用 localStorage 或其他存储方案
+    try {
+      // 可以在这里添加 AI 建议生成逻辑
+      console.log('保存心情:', { content, mood: selectedMood });
       setContent('');
       setSelectedMood(null);
-      await fetchEntries();
-    }
-    setLoading(false);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-
-    if (diffInHours < 24) {
-      return `今天 ${date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`;
-    } else if (diffInHours < 48) {
-      return `昨天 ${date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`;
-    } else {
-      return date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      console.error('保存失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,10 +33,6 @@ export default function MoodJournal() {
       day: 'numeric',
       weekday: 'long'
     });
-  };
-
-  const getMoodEmoji = (mood: MoodType) => {
-    return MOOD_OPTIONS.find(m => m.type === mood)?.emoji || '';
   };
 
   return (
@@ -129,45 +96,7 @@ export default function MoodJournal() {
           </span>
         </button>
 
-        {entries.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-lg font-semibold mb-6 flex items-center gap-2" style={{ color: '#5A5A5A' }}>
-              <span>我的心情记录</span>
-            </h2>
-
-            <div className="relative">
-              <div className="absolute left-6 top-0 bottom-0 w-0.5" style={{ backgroundColor: '#E8E5E0' }}></div>
-
-              <div className="space-y-6">
-                {entries.map((entry, index) => (
-                  <div key={entry.id} className="relative pl-16">
-                    <div
-                      className="absolute left-3 w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: '#D4A59A' }}
-                    >
-                      <span className="text-xs">{getMoodEmoji(entry.mood)}</span>
-                    </div>
-
-                    <div
-                      className="bg-white rounded-2xl p-5 shadow-md"
-                      style={{
-                        boxShadow: '0 4px 16px rgba(154, 168, 150, 0.08)',
-                        animation: index === 0 ? 'slideIn 0.3s ease-out' : 'none'
-                      }}
-                    >
-                      <p className="text-xs mb-2" style={{ color: '#9BA896' }}>
-                        {formatDate(entry.created_at)}
-                      </p>
-                      <p className="text-base leading-relaxed" style={{ color: '#5A5A5A' }}>
-                        {entry.event}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* 历史记录功能已移除，因为不再使用数据库 */}
       </div>
 
       <style>{`
