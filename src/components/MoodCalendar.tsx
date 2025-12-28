@@ -100,9 +100,8 @@ export default function MoodCalendar() {
   const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FAF8F5' }}>
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="bg-white rounded-3xl shadow-lg p-6" style={{ boxShadow: '0 8px 24px rgba(154, 168, 150, 0.12)' }}>
+    <div className="w-full">
+      <div className="bg-white rounded-3xl shadow-lg p-6" style={{ boxShadow: '0 8px 24px rgba(154, 168, 150, 0.12)' }}>
           {/* 月份导航 */}
           <div className="flex items-center justify-between mb-6">
             <button
@@ -254,7 +253,6 @@ export default function MoodCalendar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
     </div>
   );
 }

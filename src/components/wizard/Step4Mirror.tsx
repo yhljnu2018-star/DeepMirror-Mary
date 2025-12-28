@@ -8,7 +8,7 @@ interface Step4MirrorProps {
   advice: string;
   loading: boolean;
   onReset: () => void;
-  onShowEnding?: () => void;
+  onShowEnding?: (conversationSummary?: string) => void;
   initialContext?: {
     event: string;
     mood: string;
@@ -292,7 +292,17 @@ export default function Step4Mirror({ advice, loading, onReset, onShowEnding, in
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={onShowEnding}
+                  onClick={() => {
+                    // 生成对话总结：提取所有用户和助手消息的主要内容
+                    const conversationText = messages
+                      .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
+                      .map((msg) => {
+                        const role = msg.role === 'user' ? '我' : '理性闺蜜';
+                        return `${role}: ${msg.content}`;
+                      })
+                      .join('\n\n');
+                    onShowEnding(conversationText || undefined);
+                  }}
                   className="w-full py-3 rounded-2xl font-medium text-white transition-all flex items-center justify-center gap-2"
                   style={{
                     background: 'linear-gradient(135deg, #9BA896 0%, #8A9680 50%, #7A8670 100%)',

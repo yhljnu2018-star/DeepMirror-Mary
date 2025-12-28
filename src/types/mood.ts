@@ -19,11 +19,12 @@ export interface WizardData {
 }
 
 export const MOOD_OPTIONS: { type: MoodType; emoji: string; label: string }[] = [
-  { type: 'happy', emoji: '😊', label: '开心' },
-  { type: 'anxious', emoji: '😰', label: '焦虑' },
-  { type: 'angry', emoji: '😠', label: '生气' },
-  { type: 'calm', emoji: '😌', label: '平静' },
-  { type: 'sad', emoji: '😢', label: '难过' },
+  { type: 'happy', emoji: '😆', label: '快乐' },
+  { type: 'sad', emoji: '😭', label: '悲伤' },
+  { type: 'angry', emoji: '😡', label: '愤怒' },
+  { type: 'anxious', emoji: '😱', label: '恐惧' },
+  { type: 'anxious', emoji: '😦', label: '惊讶' },
+  { type: 'anxious', emoji: '😕', label: '焦虑' },
 ];
 
 export const CATEGORY_OPTIONS: { type: CategoryType; icon: string; title: string; desc: string }[] = [
