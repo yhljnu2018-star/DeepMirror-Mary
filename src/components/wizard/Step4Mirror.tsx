@@ -8,6 +8,7 @@ interface Step4MirrorProps {
   advice: string;
   loading: boolean;
   onReset: () => void;
+  onShowEnding?: () => void;
   initialContext?: {
     event: string;
     mood: string;
@@ -22,7 +23,7 @@ const QUICK_REPLIES = [
   { id: '3', emoji: '🫂', text: '我还想求抱抱' },
 ];
 
-export default function Step4Mirror({ advice, loading, onReset, initialContext }: Step4MirrorProps) {
+export default function Step4Mirror({ advice, loading, onReset, onShowEnding, initialContext }: Step4MirrorProps) {
   const [isChatMode, setIsChatMode] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -284,9 +285,23 @@ export default function Step4Mirror({ advice, loading, onReset, initialContext }
             </motion.div>
           )}
 
-          {/* 重置按钮 */}
+          {/* 重置按钮和结束对话按钮 */}
           {isChatMode && (
-            <div className="pt-4 border-t" style={{ borderColor: '#F0EDE8' }}>
+            <div className="pt-4 border-t space-y-3" style={{ borderColor: '#F0EDE8' }}>
+              {onShowEnding && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onShowEnding}
+                  className="w-full py-3 rounded-2xl font-medium text-white transition-all flex items-center justify-center gap-2"
+                  style={{
+                    background: 'linear-gradient(135deg, #9BA896 0%, #8A9680 50%, #7A8670 100%)',
+                    boxShadow: '0 4px 16px rgba(154, 168, 150, 0.3)',
+                  }}
+                >
+                  🌊 结束对话
+                </motion.button>
+              )}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

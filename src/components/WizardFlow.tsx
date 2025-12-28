@@ -6,11 +6,13 @@ import Step1Event from './wizard/Step1Event';
 import Step2Feeling from './wizard/Step2Feeling';
 import Step3Category from './wizard/Step3Category';
 import Step4Mirror from './wizard/Step4Mirror';
+import DriftBottleEnding from './DriftBottleEnding';
 
 export default function WizardFlow() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [aiAdvice, setAiAdvice] = useState('');
+  const [showEnding, setShowEnding] = useState(false);
   const [wizardData, setWizardData] = useState<WizardData>({
     event: '',
     mood: null,
@@ -56,6 +58,7 @@ export default function WizardFlow() {
 
   const handleReset = () => {
     setStep(1);
+    setShowEnding(false);
     setWizardData({
       event: '',
       mood: null,
@@ -63,6 +66,10 @@ export default function WizardFlow() {
       category: null,
     });
     setAiAdvice('');
+  };
+
+  const handleShowEnding = () => {
+    setShowEnding(true);
   };
 
   const getCurrentDate = () => {
@@ -74,6 +81,25 @@ export default function WizardFlow() {
       weekday: 'long',
     });
   };
+
+  // 如果显示结束页面，直接渲染漂流瓶组件
+  if (showEnding) {
+    return (
+      <DriftBottleEnding
+        onReset={handleReset}
+        moodData={
+          wizardData.mood
+            ? {
+                mood: wizardData.mood,
+                intensity: wizardData.intensity,
+                event: wizardData.event,
+                category: wizardData.category || undefined,
+              }
+            : undefined
+        }
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FAF8F5' }}>
@@ -155,6 +181,7 @@ export default function WizardFlow() {
                 advice={aiAdvice}
                 loading={loading}
                 onReset={handleReset}
+                onShowEnding={handleShowEnding}
                 initialContext={
                   wizardData.mood && wizardData.category
                     ? {

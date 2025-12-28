@@ -111,7 +111,10 @@ export async function generateInitialAdvice(context: InitialContext): Promise<st
           content: userMessage,
         },
       ],
-      temperature: 0.7,
+      // 初始建议也使用相同的参数，保持一致性
+      temperature: 1.1,
+      presence_penalty: 0.6,
+      frequency_penalty: 0.3,
       max_tokens: 500,
     }),
   });
@@ -137,8 +140,8 @@ export async function createChatStream(
   }
 
   // 过滤掉 system 消息（如果有的话），因为我们会重新添加
-  // 保留所有 user 和 assistant 消息，确保完整对话历史
-  const userAssistantMessages = messages.filter(
+  // 保留所有 user 和 assistant 消息
+  let userAssistantMessages = messages.filter(
     (msg) => msg.role === 'user' || msg.role === 'assistant'
   );
 
@@ -161,7 +164,22 @@ export async function createChatStream(
     );
   }
 
-  // 构建消息列表：system message 始终在第一位 + 完整的对话历史
+  // 优化：限制上下文长度，防止过长导致 AI 跑偏
+  // 1. System Prompt 始终保留（会在下面单独添加）
+  // 2. 只保留最近的 10 轮对话（最后 20 条消息）
+  const MAX_CONVERSATION_ROUNDS = 10;
+  const MAX_MESSAGES = MAX_CONVERSATION_ROUNDS * 2; // 每轮对话包含 user 和 assistant 各一条
+
+  if (userAssistantMessages.length > MAX_MESSAGES) {
+    // 只保留最后 N 条消息
+    const originalLength = userAssistantMessages.length;
+    userAssistantMessages = userAssistantMessages.slice(-MAX_MESSAGES);
+    console.log(
+      `上下文优化: 从 ${originalLength} 条消息缩减到 ${userAssistantMessages.length} 条（保留最近 ${MAX_CONVERSATION_ROUNDS} 轮对话）`
+    );
+  }
+
+  // 构建消息列表：system message 始终在第一位 + 优化后的对话历史
   const chatMessages = [
     {
       role: 'system' as const,
@@ -175,8 +193,9 @@ export async function createChatStream(
 
   // 调试日志：打印发送的消息数量
   console.log('发送给 API 的消息数量:', chatMessages.length);
-  console.log('System Prompt 长度:', systemPrompt.length);
-  console.log('对话历史消息数:', userAssistantMessages.length);
+  console.log('  - System Prompt: 1 条');
+  console.log('  - 对话历史:', userAssistantMessages.length, '条');
+  console.log('  - System Prompt 长度:', systemPrompt.length, '字符');
 
   const endpoint = `${API_BASE_URL}/chat/completions`;
   const response = await fetch(endpoint, {
@@ -188,7 +207,15 @@ export async function createChatStream(
     body: JSON.stringify({
       model: 'deepseek-chat',
       messages: chatMessages,
-      temperature: 0.7,
+      // 1. 温度 (Temperature): 调高到 1.0 - 1.2
+      // 让它更敢说、更有创意，不那么刻板。
+      temperature: 1.1,
+      // 2. 存在惩罚 (Presence Penalty): 设为 0.5 - 1.0
+      // 强迫它去聊新话题，不要总是重复已经说过的话。
+      presence_penalty: 0.6,
+      // 3. 频率惩罚 (Frequency Penalty): 设为 0.3
+      // 减少常用词的重复使用。
+      frequency_penalty: 0.3,
       max_tokens: 200,
       stream: true,
     }),

@@ -28,12 +28,12 @@ export default function Step2Feeling({
         <p className="text-sm mb-4" style={{ color: '#9BA896' }}>
           选择你的心情
         </p>
-        <div className="flex gap-4 justify-around mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 justify-items-center">
           {MOOD_OPTIONS.map((option) => (
             <button
               key={option.type}
               onClick={() => onMoodChange(option.type)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all ${
+              className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all w-full ${
                 mood === option.type ? 'scale-110' : 'scale-100 opacity-60 hover:opacity-80'
               }`}
               style={{
